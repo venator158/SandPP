@@ -1,0 +1,13 @@
+version: '3.8'
+services:
+  pathsandbox:
+    build: .
+    image: pathsandbox:latest
+    volumes:
+      - ./examples:/data:rw
+    environment:
+      PLANNER: dijkstra
+      INPUT: /data/grid1.json
+      OUTPUT_DIR: /data/out
+    command: ["--input","/data/grid1.json","--planner","dijkstra","--output","/data/out"]
+    restart: 'no'
