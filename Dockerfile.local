@@ -1,0 +1,12 @@
+FROM eclipse-temurin:17-jre-jammy
+
+RUN groupadd --system app && useradd --system --gid app --create-home app
+WORKDIR /opt/app
+COPY app/target/app-0.1.0-SNAPSHOT-shaded.jar /opt/app/app.jar
+RUN chown -R app:app /opt/app
+USER app
+
+EXPOSE 8080
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s CMD java -jar /opt/app/app.jar --healthcheck || exit 1
+
+ENTRYPOINT ["java","-jar","/opt/app/app.jar"]

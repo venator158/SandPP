@@ -1,0 +1,1 @@
+{"input":"examples/grid3.json","distanceRatio":0.3299831645537222,"executionTimeMs":17,"pathLength":61,"actualDistance":60.0,"nodesExpanded":125,"planner":"dijkstra","status":"success"}

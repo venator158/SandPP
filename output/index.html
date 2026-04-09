@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PathRenderer</title>
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; background: #f0f0f0; margin-top: 20px; }
+        #grid { display: grid; gap: 2px; background: #333; padding: 2px; border: 2px solid #222; }
+        .cell { width: 40px; height: 40px; background: white; display: flex; justify-content: center; align-items: center; font-size: 24px; }
+        .obstacle { background: #555; }
+        .path { background: #b3e5fc; }
+        .start { background: #c8e6c9; }
+        .goal { background: #ffcdd2; }
+        #controls { margin-top: 20px; }
+        button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h2>Path Animation (🤖 -> 🏁)</h2>
+    <div id="grid"></div>
+    <div id="controls">
+        <button onclick="startAnimation()">Play</button>
+        <button onclick="resetAnimation()">Reset</button>
+    </div>
+    <script>
+        const gridData = {"width":15,"height":15,"occupancy":[0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,1,1,1,1,1,0,1,1,1,1,1,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,1,1,1,1,1,1,1,1,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1,1,1,0,1,1,1,0,1,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]};
+        const pathData = [{"x":0,"y":0},{"x":1,"y":0},{"x":2,"y":0},{"x":2,"y":1},{"x":2,"y":2},{"x":3,"y":2},{"x":4,"y":2},{"x":4,"y":1},{"x":4,"y":0},{"x":5,"y":0},{"x":6,"y":0},{"x":6,"y":1},{"x":6,"y":2},{"x":7,"y":2},{"x":8,"y":2},{"x":8,"y":1},{"x":8,"y":0},{"x":9,"y":0},{"x":10,"y":0},{"x":10,"y":1},{"x":10,"y":2},{"x":11,"y":2},{"x":12,"y":2},{"x":12,"y":3},{"x":12,"y":4},{"x":11,"y":4},{"x":10,"y":4},{"x":9,"y":4},{"x":8,"y":4},{"x":8,"y":5},{"x":8,"y":6},{"x":7,"y":6},{"x":6,"y":6},{"x":5,"y":6},{"x":4,"y":6},{"x":3,"y":6},{"x":2,"y":6},{"x":1,"y":6},{"x":0,"y":6},{"x":0,"y":7},{"x":0,"y":8},{"x":0,"y":9},{"x":0,"y":10},{"x":0,"y":11},{"x":0,"y":12},{"x":1,"y":12},{"x":2,"y":12},{"x":3,"y":12},{"x":4,"y":12},{"x":5,"y":12},{"x":6,"y":12},{"x":7,"y":12},{"x":7,"y":13},{"x":7,"y":14},{"x":8,"y":14},{"x":9,"y":14},{"x":10,"y":14},{"x":11,"y":14},{"x":12,"y":14},{"x":13,"y":14},{"x":14,"y":14}];
+        const gridEl = document.getElementById('grid');
+        let animInterval = null;
+
+        // Render Grid initial state
+        function renderGrid() {
+            gridEl.innerHTML = '';
+            gridEl.style.gridTemplateColumns = `repeat(${gridData.width}, 40px)`;
+            for (let y = 0; y < gridData.height; y++) {
+                for (let x = 0; x < gridData.width; x++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.id = `cell-${x}-${y}`;
+                    if (gridData.occupancy[y * gridData.width + x] === 1) {
+                        cell.classList.add('obstacle');
+                    }
+                    gridEl.appendChild(cell);
+                }
+            }
+
+            if (pathData.length > 0) {
+               document.getElementById(`cell-${pathData[0].x}-${pathData[0].y}`).classList.add('start');
+               const goalCell = document.getElementById(`cell-${pathData[pathData.length-1].x}-${pathData[pathData.length-1].y}`);
+               goalCell.classList.add('goal');
+               goalCell.textContent = '🏁';
+               
+               // Place avatar at start
+               document.getElementById(`cell-${pathData[0].x}-${pathData[0].y}`).textContent = '🤖';
+            }
+        }
+
+        function startAnimation() {
+            resetAnimation();
+            if (pathData.length === 0) return;
+            
+            let step = 0;
+            animInterval = setInterval(() => {
+                // Remove avatar from previous
+                if (step > 0) {
+                    const prev = pathData[step - 1];
+                    const prevCell = document.getElementById(`cell-${prev.x}-${prev.y}`);
+                    prevCell.textContent = prevCell.classList.contains('goal') ? '🏁' : '';
+                    prevCell.classList.add('path');
+                }
+                
+                // Place avatar at current step
+                const curr = pathData[step];
+                document.getElementById(`cell-${curr.x}-${curr.y}`).textContent = '🤖';
+                
+                step++;
+                if (step >= pathData.length) {
+                    clearInterval(animInterval);
+                }
+            }, 200);
+        }
+
+        function resetAnimation() {
+            if (animInterval) clearInterval(animInterval);
+            renderGrid();
+        }
+
+        renderGrid();
+    </script>
+</body>
+</html>

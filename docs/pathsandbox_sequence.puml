@@ -1,0 +1,28 @@
+@startuml
+actor User
+participant MainCli as "MainCli (app)"
+participant InputLoader as "IO / examples"
+participant Planner as "Planner (planners module)"
+participant Renderer as "Renderer (rendering module)"
+participant FS as "Filesystem / Output (metrics.json, out dir)"
+
+== Normal run ==
+User -> MainCli: run --input <path> --planner <name> --output <dir>
+MainCli -> MainCli: parseArgs()
+alt healthcheck
+    MainCli -> MainCli: detect --healthcheck
+    MainCli --> User: prints "ok" and exit
+else normal
+    MainCli -> InputLoader: load input (grid1.json)
+    InputLoader --> MainCli: grid data
+    MainCli -> Planner: select planner (e.g., dijkstra).run(grid)
+    Planner --> MainCli: path result
+    MainCli -> Renderer: render(path, grid)  
+    Renderer --> MainCli: rendered output (optional)
+    MainCli -> FS: write output files (path.*, render.*, metrics.json)
+    FS --> MainCli: files written
+    MainCli --> User: exit 0 (prints metrics path)
+end
+
+note over MainCli,Planner: planner choice may be pluggable (strategy pattern)
+@enduml
