@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Path Result</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body class="container mt-5">
+    <h2>Path Execution Results</h2>
+    <hr>
+    
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+    
+    <div th:if="${log}">
+        <table class="table table-bordered">
+            <thead class="thead-dark">
+                <tr><th>Metric</th><th>Value</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>ID (Database)</td><td th:text="${log.id}"></td></tr>
+                <tr><td>Algorithm</td><td th:text="${log.plannerName}"></td></tr>
+                <tr><td>Map</td><td th:text="${log.inputMap}"></td></tr>
+                <tr><td>Start</td><td th:text="${log.startCoord}"></td></tr>
+                <tr><td>Goal</td><td th:text="${log.goalCoord}"></td></tr>
+                <tr><td>Execution Time</td><td th:text="${log.executionTimeMs} + ' ms'"></td></tr>
+                <tr><td>Nodes Expanded</td><td th:text="${log.nodesExpanded}"></td></tr>
+                <tr><td>Path Length Steps</td><td th:text="${log.pathLength}"></td></tr>
+                <tr><td>Actual Distance</td><td th:text="${log.actualDistance}"></td></tr>
+            </tbody>
+        </table>
+        
+        <div class="alert alert-success">
+            <b>Database Log Created At:</b> <span th:text="${log.executionDate}"></span>
+        </div>
+        
+        <div class="mt-4 text-center pb-5">
+            <p><b>View Rendering:</b></p>
+            
+            <div th:if="${#strings.startsWith(log.generatedUrl, 'http://')}">
+                <a th:href="${log.generatedUrl}" target="_blank" class="btn btn-warning btn-lg">Open Path in Geojson.io</a>
+            </div>
+            
+            <div th:unless="${#strings.startsWith(log.generatedUrl, 'http://')}">
+                <p>The grid visualization was output directly to your local <code>output/index.html</code> folder.</p>
+                <p>For Web integration of Canvas rendering, this would require hosting the grid JSON as an API endpoint. But for now, you can open that file on your local machine.</p>
+            </div>
+            <a href="/" class="btn btn-secondary mt-3">Back to Menu</a>
+            <a href="/history" class="btn btn-info mt-3">View Full History</a>
+        </div>
+    </div>
+</body>
+</html>

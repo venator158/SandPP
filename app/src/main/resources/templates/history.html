@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Pathfinder Database History</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body class="container mt-5">
+    <h2>Database View: Pathfinding Execution History</h2>
+    <a href="/" class="btn btn-secondary mb-3">Back to Menu</a>
+    
+    <table class="table table-striped table-bordered text-center">
+        <thead class="thead-dark">
+            <tr>
+                <th>ID</th>
+                <th>Run Date</th>
+                <th>Map</th>
+                <th>Algorithm</th>
+                <th>Start &rarr; Goal</th>
+                <th>Length</th>
+                <th>Exec Time (ms)</th>
+                <th>Nodes Expanded</th>
+                <th>GeoURL</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="l : ${logs}">
+                <td th:text="${l.id}"></td>
+                <td th:text="${l.executionDate}"></td>
+                <td th:text="${l.inputMap}"></td>
+                <td th:text="${l.plannerName}"></td>
+                <td th:text="${l.startCoord} + '->' + ${l.goalCoord}"></td>
+                <td th:text="${l.pathLength}"></td>
+                <td th:text="${l.executionTimeMs}"></td>
+                <td th:text="${l.nodesExpanded}"></td>
+                <td>
+                    <a th:if="${#strings.startsWith(l.generatedUrl, 'http://')}" th:href="${l.generatedUrl}" target="_blank">View Map</a>
+                    <span th:unless="${#strings.startsWith(l.generatedUrl, 'http://')}">Local</span>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>

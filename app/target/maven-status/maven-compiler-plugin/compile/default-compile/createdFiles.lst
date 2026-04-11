@@ -1,1 +1,5 @@
-com\example\pathsandbox\app\MainCli.class
+com\example\pathsandbox\app\controller\PathController.class
+com\example\pathsandbox\app\service\PathService.class
+com\example\pathsandbox\app\repository\PathExecutionLogRepository.class
+com\example\pathsandbox\app\model\PathExecutionLog.class
+com\example\pathsandbox\app\SandPpWebApplication.class

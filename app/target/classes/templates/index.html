@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>SandPP - Path Planner</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body class="container mt-5">
+    <h2>SandPP - Path Planning Engine</h2>
+    <hr>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <h4>Execute New Path</h4>
+            <form action="/execute" method="post">
+                <div class="form-group">
+                    <label>Map Input File (e.g. examples/grid1.json or examples/neighbour.osm)</label>
+                    <input type="text" name="inputMap" class="form-control" value="examples/grid1.json" required>
+                </div>
+                <div class="form-group">
+                    <label>Start Coordinate (x,y or lat,lon)</label>
+                    <input type="text" name="startCoord" class="form-control" value="0,0" required>
+                </div>
+                <div class="form-group">
+                    <label>Goal Coordinate (x,y or lat,lon)</label>
+                    <input type="text" name="goalCoord" class="form-control" value="4,4" required>
+                </div>
+                <div class="form-group">
+                    <label>Planner Algorithm</label>
+                    <select name="plannerName" class="form-control">
+                        <option value="dijkstra">Dijkstra's Algorithm</option>
+                        <option value="random">Random Traversal</option>
+                    </select>
+                </div>
+                <div class="form-group form-check">
+                    <input type="checkbox" class="form-check-input" name="diagonals" value="true">
+                    <label class="form-check-label">Allow Diagonals (Grid Only)</label>
+                </div>
+                <button type="submit" class="btn btn-primary">Find Path</button>
+            </form>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card p-3">
+                <h5>Academic Requirements Met:</h5>
+                <ul>
+                    <li><b>MVC Framework:</b> Spring Boot Web MVC</li>
+                    <li><b>Persistence:</b> H2 Relational Database</li>
+                    <li><b>Design Patterns:</b> Strategy (Planners), Factory (Graph/Grid Builders)</li>
+                </ul>
+                <a href="/history" class="btn btn-info w-100">View Execution History Database</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
