@@ -44,7 +44,7 @@ public class RandomTraversalPlanner implements PathPlanner {
             return new PathResult(Collections.emptyList(), 0.0, 0.0);
         }
 
-        double straightD = Math.sqrt(Math.pow(goal.getX() - start.getX(), 2) + Math.pow(goal.getY() - start.getY(), 2));
+        double straightD = start.calculateDistance(goal);
         double ratio = (straightD > 0 && actualDistance > 0) ? (straightD / actualDistance) : 1.0;
 
         return new PathResult(path, actualDistance, ratio);

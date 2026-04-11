@@ -71,8 +71,8 @@ public class DijkstraPlanner implements PathPlanner {
         
         double actualDistance = dist.getOrDefault(goal, 0.0);
         
-        // Calculate euclidean straight line as ratio basis
-        double straightD = Math.sqrt(Math.pow(goal.getX() - start.getX(), 2) + Math.pow(goal.getY() - start.getY(), 2));
+        // Calculate abstract straight line distance (for ratio metric)
+        double straightD = start.calculateDistance(goal);
         double ratio = (straightD > 0 && actualDistance > 0) ? (straightD / actualDistance) : 1.0;
 
         return new PathResult(path, actualDistance, ratio);

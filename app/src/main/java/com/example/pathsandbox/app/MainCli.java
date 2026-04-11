@@ -14,6 +14,8 @@ import com.example.pathsandbox.core.Coordinate;
 import com.example.pathsandbox.core.Grid;
 import com.example.pathsandbox.core.PathResult;
 import com.example.pathsandbox.io.GridReader;
+import com.example.pathsandbox.io.OsmGraphBuilder;
+import com.example.pathsandbox.io.OsmParser;
 import com.example.pathsandbox.planners.DijkstraPlanner;
 import com.example.pathsandbox.planners.PathPlanner;
 import com.example.pathsandbox.planners.RandomTraversalPlanner;
@@ -43,29 +45,57 @@ public class MainCli {
         String[] startParts = startStr.split(",");
         String[] goalParts = goalStr.split(",");
         if (startParts.length != 2 || goalParts.length != 2) {
-            System.err.println("Start and goal must be in the format x,y");
+            System.err.println("Start and goal must be in the format x,y or lat,lon");
             System.exit(2);
         }
 
-        int startX = Integer.parseInt(startParts[0].trim());
-        int startY = Integer.parseInt(startParts[1].trim());
-        int goalX = Integer.parseInt(goalParts[0].trim());
-        int goalY = Integer.parseInt(goalParts[1].trim());
-
-        Coordinate start = new Coordinate(startX, startY);
-        Coordinate goal = new Coordinate(goalX, goalY);
-
+        double startX = Double.parseDouble(startParts[0].trim());
+        double startY = Double.parseDouble(startParts[1].trim());
+        double goalX = Double.parseDouble(goalParts[0].trim());
+        double goalY = Double.parseDouble(goalParts[1].trim());
+        
         boolean allowDiagonals = Boolean.parseBoolean(allowDiagonalsStr);
 
         Path outDir = Path.of(output);
         Files.createDirectories(outDir);
 
-        System.out.println("Reading grid from " + input);
-        Grid grid = GridReader.read(Path.of(input));
-        
-        System.out.println("Building graph...");
-        BasicGridGraphBuilder graphBuilder = new BasicGridGraphBuilder(allowDiagonals);
-        AdjacencyGraph graph = graphBuilder.build(grid);
+        Coordinate start;
+        Coordinate goal;
+        AdjacencyGraph graph;
+        Grid grid = null; // Remains null if OSM map
+
+        System.out.println("Processing map from " + input);
+
+        if (input.endsWith(".osm") || input.endsWith(".xml")) {
+            // Process Geographical Model
+            OsmParser.OsmGraph osmGraph = OsmParser.parse(Path.of(input));
+            System.out.println("Building Map from " + osmGraph.getNodes().size() + " geo nodes...");
+            graph = OsmGraphBuilder.build(osmGraph);
+
+            OsmParser.OsmNode sNode = osmGraph.findNearestNode(startX, startY);
+            OsmParser.OsmNode gNode = osmGraph.findNearestNode(goalX, goalY);
+
+            if (sNode == null || gNode == null) {
+                System.err.println("Failed to find valid nodes in the loaded OSM tile nearest to coordinate inputs");
+                System.exit(1);
+            }
+
+            System.out.println("Closest start node mapped: " + sNode.getId());
+            System.out.println("Closest goal node mapped: " + gNode.getId());
+            
+            start = new Coordinate(String.valueOf(sNode.getId()), sNode.getLon(), sNode.getLat());
+            goal = new Coordinate(String.valueOf(gNode.getId()), gNode.getLon(), gNode.getLat());
+
+        } else {
+            // Process Native Integer Grid Array 
+            start = new Coordinate((int)startX, (int)startY);
+            goal = new Coordinate((int)goalX, (int)goalY);
+
+            grid = GridReader.read(Path.of(input));
+            System.out.println("Building Grid Graph...");
+            BasicGridGraphBuilder graphBuilder = new BasicGridGraphBuilder(allowDiagonals);
+            graph = graphBuilder.build(grid);
+        }
 
         PathPlanner planner;
         if ("dijkstra".equalsIgnoreCase(plannerName)) {
@@ -84,8 +114,21 @@ public class MainCli {
         long execTime = System.currentTimeMillis() - startTime;
 
         Renderer.renderToPathJson(result, outDir.resolve("path.json"));
-        Renderer.renderToHtml(grid, result, outDir.resolve("index.html"));
-        System.out.println("Wrote path visualization to " + outDir.resolve("index.html").toAbsolutePath());
+
+        if (grid != null) {
+            Renderer.renderToHtml(grid, result, outDir.resolve("index.html"));
+            System.out.println("Wrote JSON grid visualization to " + outDir.resolve("index.html").toAbsolutePath());
+        } else {
+            Renderer.renderGeoJSON(result, outDir.resolve("path.geojson"));
+            System.out.println("Wrote geographic path visualization to " + outDir.resolve("path.geojson").toAbsolutePath());
+            
+            // Read generated JSON, remove whitespace and newlines for a compact URL
+            String geoJsonData = Files.readString(outDir.resolve("path.geojson"));
+            String minimalJson = geoJsonData.replaceAll("\\s+", "");
+            String encoded = java.net.URLEncoder.encode(minimalJson, "UTF-8");
+            
+            System.out.println("View on map: http://geojson.io/#data=data:application/json," + encoded);
+        }
 
         Map<String, Object> metrics = new HashMap<>();
         metrics.put("status", result.getPath().isEmpty() ? "no_path" : "success");

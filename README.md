@@ -31,6 +31,12 @@ Upon successful execution, the tool generates three files in the specified outpu
 * `dijkstra`: Finds the shortest path using Dijkstra's algorithm.
 * `random`: A naive random walk traversal simulator (useful as a baseline or for testing threshold limits and failure states).
 
+### OpenStreetMap (OSM) Support
+SandPP natively supports real-world `.osm` and `.xml` street maps alongside local integer grids!
+* Input your map via `--input map.osm`
+* The `--start` and `--goal` coordinates shift to **Latitude,Longitude** (e.g. `--start 12.975,77.670`). The application will scan millions of geographic nodes and hook to the nearest physical street intersection.
+* The output automatically pivots to **GeoJSON**. Furthermore, a highly-convenient, clickable `http://geojson.io` link containing the encoded physical path will print out to your terminal when the program completes.
+
 Run Locally
 -----------
 
@@ -49,14 +55,15 @@ Run **Dijkstra** on the 5x5 grid (Grid 1):
 java -jar app/target/app.jar --input examples/grid1.json --start 0,0 --goal 4,4 --planner dijkstra --output output
 ```
 
-Run **Dijkstra** with 8-way diagonal movement on the 10x10 maze (Grid 2):
-```bash
-java -jar app/target/app.jar --input examples/grid2.json --start 0,0 --goal 9,9 --planner dijkstra --diagonals true --output output
-```
-
 Run **Random Traversal** on the 15x15 maze (Grid 3):
 ```bash
 java -jar app/target/app.jar --input examples/grid3.json --start 0,0 --goal 14,14 --planner random --output output
+```
+
+Run **Dijkstra on OpenStreetMap (OSM)**:
+Assuming the bounding box mapped in `neighbour.osm`, finding a route between two geographic nodes using longitude and latitude coordinates:
+```bash
+java -jar app/target/app.jar --input examples/neighbour.osm --start 12.975,77.670 --goal 12.978,77.676 --planner dijkstra --output output
 ```
 
 Optional flags:

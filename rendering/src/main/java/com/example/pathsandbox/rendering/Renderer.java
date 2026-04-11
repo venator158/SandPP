@@ -17,6 +17,42 @@ public class Renderer {
         }
     }
 
+    public static void renderGeoJSON(PathResult result, Path outputPath) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{\n");
+        sb.append("  \"type\": \"FeatureCollection\",\n");
+        sb.append("  \"features\": [\n");
+        sb.append("    {\n");
+        sb.append("      \"type\": \"Feature\",\n");
+        sb.append("      \"geometry\": {\n");
+        sb.append("        \"type\": \"LineString\",\n");
+        sb.append("        \"coordinates\": [\n");
+        
+        java.util.List<com.example.pathsandbox.core.Coordinate> path = result.getPath();
+        for (int i = 0; i < path.size(); i++) {
+            com.example.pathsandbox.core.Coordinate c = path.get(i);
+            // GeoJSON expects [longitude, latitude]
+            sb.append(String.format("          [%f, %f]", c.getX(), c.getY()));
+            if (i < path.size() - 1) {
+                sb.append(",");
+            }
+            sb.append("\n");
+        }
+        
+        sb.append("        ]\n");
+        sb.append("      },\n");
+        sb.append("      \"properties\": {\n");
+        sb.append("        \"name\": \"Calculated Path\"\n");
+        sb.append("      }\n");
+        sb.append("    }\n");
+        sb.append("  ]\n");
+        sb.append("}\n");
+
+        try (FileWriter fw = new FileWriter(outputPath.toFile())) {
+            fw.write(sb.toString());
+        }
+    }
+
     public static void renderToHtml(Grid grid, PathResult result, Path outputPath) throws IOException {
         String gridJson = GSON.toJson(grid);
         String pathJson = GSON.toJson(result.getPath());
@@ -27,8 +63,9 @@ public class Renderer {
             "    <title>PathRenderer</title>\n" +
             "    <style>\n" +
             "        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; background: #f0f0f0; margin-top: 20px; }\n" +
-            "        #grid { display: grid; gap: 2px; background: #333; padding: 2px; border: 2px solid #222; }\n" +
-            "        .cell { width: 40px; height: 40px; background: white; display: flex; justify-content: center; align-items: center; font-size: 24px; }\n" +
+            "        #grid-wrapper { width: 80vmin; height: 80vmin; max-width: 800px; max-height: 800px; }\n" +
+            "        #grid { display: grid; gap: 1px; background: #333; border: 2px solid #222; width: 100%; height: 100%; }\n" +
+            "        .cell { background: white; display: flex; justify-content: center; align-items: center; font-size: min(3vmin, 30px); }\n" +
             "        .obstacle { background: #555; }\n" +
             "        .path { background: #b3e5fc; }\n" +
             "        .start { background: #c8e6c9; }\n" +
@@ -39,7 +76,9 @@ public class Renderer {
             "</head>\n" +
             "<body>\n" +
             "    <h2>Path Animation (🤖 -> 🏁)</h2>\n" +
-            "    <div id=\"grid\"></div>\n" +
+            "    <div id=\"grid-wrapper\">\n" +
+            "        <div id=\"grid\"></div>\n" +
+            "    </div>\n" +
             "    <div id=\"controls\">\n" +
             "        <button onclick=\"startAnimation()\">Play</button>\n" +
             "        <button onclick=\"resetAnimation()\">Reset</button>\n" +
@@ -53,7 +92,8 @@ public class Renderer {
             "        // Render Grid initial state\n" +
             "        function renderGrid() {\n" +
             "            gridEl.innerHTML = '';\n" +
-            "            gridEl.style.gridTemplateColumns = `repeat(${gridData.width}, 40px)`;\n" +
+            "            gridEl.style.gridTemplateColumns = `repeat(${gridData.width}, 1fr)`;\n" +
+            "            gridEl.style.gridTemplateRows = `repeat(${gridData.height}, 1fr)`;\n" +
             "            for (let y = 0; y < gridData.height; y++) {\n" +
             "                for (let x = 0; x < gridData.width; x++) {\n" +
             "                    const cell = document.createElement('div');\n" +
