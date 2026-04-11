@@ -16,7 +16,7 @@
                 <tr><th>Metric</th><th>Value</th></tr>
             </thead>
             <tbody>
-                <tr><td>ID (Database)</td><td th:text="${log.id}"></td></tr>
+                <tr><td>ID</td><td th:text="${log.id}"></td></tr>
                 <tr><td>Algorithm</td><td th:text="${log.plannerName}"></td></tr>
                 <tr><td>Map</td><td th:text="${log.inputMap}"></td></tr>
                 <tr><td>Start</td><td th:text="${log.startCoord}"></td></tr>
@@ -29,7 +29,7 @@
         </table>
         
         <div class="alert alert-success">
-            <b>Database Log Created At:</b> <span th:text="${log.executionDate}"></span>
+            <b>Execution logged at:</b> <span th:text="${log.executionDate}"></span>
         </div>
         
         <div class="mt-4 text-center pb-5">
