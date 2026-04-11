@@ -64,6 +64,18 @@ Compile and package the complete Spring Boot Web application using Maven:
 ```bash
 mvn clean package -DskipTests
 ```
+Clean all existing java programs 
+```bash
+Stop-Process -Name java -Force
+```
+Clean all existing java programs running on port 8080
+```bash
+#Get the Process ID listening on port 8080
+Get-Process -Id (Get-NetTCPConnection -LocalPort 8080).OwningProcess
+
+#Stop that specific Process ID
+Stop-Process -Id <PID> -Force```
+```
 
 ### Direct Java Execution
 
@@ -85,9 +97,9 @@ Open your web browser and navigate to:
 
 ### Example Coordinates
 
-In the Web GUI form fields, if you decide to load `examples/neighbour.osm`, remember that coordinates switch from Cartesian (X,Y) to Geographic (**Longitude,Latitude**):
-* **Start Coordinate:** `12.975,77.670`
-* **Goal Coordinate:** `12.978,77.676`
+In the Web GUI form fields, if you decide to load `examples/neighbour.osm`, remember that coordinates switch from Cartesian (X,Y) to Geographic (**Latitude, Longitude**):
+* **Start Coordinate:** `12.975` (Latitude), `77.670` (Longitude)
+* **Goal Coordinate:** `12.978` (Latitude), `77.676` (Longitude)
 
 Docker
 ------
