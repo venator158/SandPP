@@ -3,18 +3,37 @@ Sandbox for testing path planning algorithms
 
 ## Project Overview
 
-SandPP is a modular Java-based CLI application designed for testing, visualizing, and evaluating different path planning algorithms on 2D grid maps.
+SandPP is a modular Java-based **Spring Boot Web Application** designed for testing, visualizing, and evaluating different path planning algorithms on 2D grid maps and Geographic (OSM) networks. The application strictly follows the **MVC (Model-View-Controller)** architecture pattern, uses an embedded **H2 Relational Database** for persistent history logging, and integrates multiple OO Design Patterns.
+
+### Architecture (MVC Framework)
+* **Model:** Handles data structures (`Grid`, `Coordinate`, `AdjacencyGraph`, and `PathResult`) and interacts with the H2 Database using the `PathExecutionLog` entity.
+* **View:** Uses HTML/CSS templates served directly from the backend via **Thymeleaf**. Enables an interactive UI for submitting coordinates, displaying performance metrics, viewing past logs, and previewing generated maps.
+* **Controller:** Built using Spring `@Controller` endpoints (`PathController.java`). It receives web requests, invokes the core engine via `PathService`, and pushes data payloads back to the Thymeleaf views.
+
+### Design Patterns Used
+1.  **Strategy Pattern (Behavioral):** The `PathPlanner` interface allows different pathfinding behaviors (`DijkstraPlanner` vs `RandomTraversalPlanner`) to be dynamically swapped during execution without modifying the core service logic.
+2.  **Factory Pattern (Creational):** The map parsers (`OsmGraphBuilder` and `GridReader`) encapsulate the complex logic required to convert raw arbitrary JSON/XML inputs into cohesive unified `AdjacencyGraph` instances for the routing abstraction.
+3.  **Adapter Pattern (Structural):** A universal `Coordinate` abstraction dynamically acts as an adapter, smoothing the logic between standard Cartesian integers (local grids) and Double precision floating Latitude/Longitude points (OSM mapping) so the core engine never knows the difference.
+4.  **Singleton Pattern (Creational):** Handled intrinsically by the Spring Boot Framework. Core dependencies such as `Renderer`, `PathService`, and database repositories are injected as Singletons context-wide to share computational memory.
 
 ### Modules
 
 The project is structured as a multi-module Maven build to cleanly separate concerns:
-* **`app`**: The main executable module and command-line interface.
-* **`core`**: Foundational domain models (`Grid`, `Coordinate`, `AdjacencyGraph`) and Graph builders.
+* **`app`**: The primary **Spring Boot Web Application**, Controllers, JPA Repositories, and Thymeleaf Views.
+* **`core`**: Foundational domain models (`Grid`, `Coordinate`, `AdjacencyGraph`).
 * **`planners`**: Implementations of various pathfinding algorithms.
-* **`io`**: Logic for parsing and reading input maps from JSON.
-* **`rendering`**: Generates visual outputs, including an interactive HTML page to animate the computed paths.
-* **`metrics`**: Tracks performance data like execution time, nodes visited, and distance ratios.
-* **`examples`**: Sample JSON grid configurations (`grid1.json`, `grid2.json`, `grid3.json`) used for testing.
+* **`io`**: Parsing layers for JSON arrays and OSM XML representations.
+* **`rendering`**: Generates visual outputs, HTML components, and GeoJSON standard links.
+* **`metrics`**: Tracks performance data.
+* **`examples`**: Sample grid configurations (`grid1.json`, `neighbour.osm`) used for testing.
+
+### User Workflow & Database Persistence
+Through the **Web Portal**, users can dynamically pick a map (or specify OSM), choose a Planner, and enter starting/ending locations.
+Every generated map is immediately logged into the **H2 Database**, keeping an active history of:
+*   Timestamp of path execution
+*   Selected planner (Dijkstra vs Random)
+*   Algorithm Metrics (nodes expanded, exec time, path length)
+*   Direct link to the generated geographical map payload
 
 ### Inputs & Outputs
 
@@ -40,35 +59,35 @@ SandPP natively supports real-world `.osm` and `.xml` street maps alongside loca
 Run Locally
 -----------
 
-Compile and package the application using Maven:
+Compile and package the complete Spring Boot Web application using Maven:
 
 ```bash
-mvn clean package
+mvn clean package -DskipTests
 ```
 
 ### Direct Java Execution
 
-You can run the application directly using the packaged JAR. Here are a few examples:
+You can run the web application directly using the packaged executable JAR.
 
-Run **Dijkstra** on the 5x5 grid (Grid 1):
+Run the Server:
 ```bash
-java -jar app/target/app.jar --input examples/grid1.json --start 0,0 --goal 4,4 --planner dijkstra --output output
+java -jar app/target/app.jar
 ```
 
-Run **Random Traversal** on the 15x15 maze (Grid 3):
-```bash
-java -jar app/target/app.jar --input examples/grid3.json --start 0,0 --goal 14,14 --planner random --output output
-```
+This starts the Spring Boot Tomcat engine.
 
-Run **Dijkstra on OpenStreetMap (OSM)**:
-Assuming the bounding box mapped in `neighbour.osm`, finding a route between two geographic nodes using longitude and latitude coordinates:
-```bash
-java -jar app/target/app.jar --input examples/neighbour.osm --start 12.975,77.670 --goal 12.978,77.676 --planner dijkstra --output output
-```
+### Launching the Dashboard
 
-Optional flags:
-* `--diagonals true` enables 8-way movement (default is 4-way `false`).
-* `--planner <name>` allows selecting different planners (e.g. `dijkstra`, `random`).
+Open your web browser and navigate to:
+* **http://localhost:8080/** -> The primary Spring Path Planning Terminal UI.
+* **http://localhost:8080/history** -> The Database History viewer for previous metrics.
+* **http://localhost:8080/h2-console** -> The internal H2 relational database UI. When connecting, ensure your JDBC URL is `jdbc:h2:mem:sandppdb` and click Connect.
+
+### Example Coordinates
+
+In the Web GUI form fields, if you decide to load `examples/neighbour.osm`, remember that coordinates switch from Cartesian (X,Y) to Geographic (**Longitude,Latitude**):
+* **Start Coordinate:** `12.975,77.670`
+* **Goal Coordinate:** `12.978,77.676`
 
 Docker
 ------
@@ -79,11 +98,13 @@ Build the image:
 docker build -t pathsandbox:latest .
 ```
 
-Run an example (mounts `./examples` to read the grid, and `./output` to get the generated `index.html`):
+Run the Web Server Container (port binding 8080):
 
 ```bash
-docker run --rm -v $(pwd)/examples:/data -v $(pwd)/output:/out pathsandbox:latest --input /data/grid1.json --start 0,0 --goal 4,4 --planner dijkstra --output /out
+docker run -p 8080:8080 --rm -v $(pwd)/examples:/app/examples pathsandbox:latest
 ```
+
+Then visit `http://localhost:8080/` in your browser.
 
 CI
 --
