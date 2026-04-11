@@ -28,11 +28,11 @@ public class PathController {
 
     @PostMapping("/execute")
     public String executePathfinding(
-            @RequestParam String inputMap,
-            @RequestParam String startCoord,
-            @RequestParam String goalCoord,
-            @RequestParam String plannerName,
-            @RequestParam(defaultValue = "false") boolean diagonals,
+            @RequestParam("inputMap") String inputMap,
+            @RequestParam("startCoord") String startCoord,
+            @RequestParam("goalCoord") String goalCoord,
+            @RequestParam("plannerName") String plannerName,
+            @RequestParam(value = "diagonals", defaultValue = "false") boolean diagonals,
             Model model) {
         
         try {
