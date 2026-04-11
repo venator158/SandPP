@@ -4,8 +4,9 @@
     <title>PathRenderer</title>
     <style>
         body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; background: #f0f0f0; margin-top: 20px; }
-        #grid { display: grid; gap: 2px; background: #333; padding: 2px; border: 2px solid #222; }
-        .cell { width: 40px; height: 40px; background: white; display: flex; justify-content: center; align-items: center; font-size: 24px; }
+        #grid-wrapper { width: 80vmin; height: 80vmin; max-width: 800px; max-height: 800px; }
+        #grid { display: grid; gap: 1px; background: #333; border: 2px solid #222; width: 100%; height: 100%; }
+        .cell { background: white; display: flex; justify-content: center; align-items: center; font-size: min(3vmin, 30px); }
         .obstacle { background: #555; }
         .path { background: #b3e5fc; }
         .start { background: #c8e6c9; }
@@ -16,21 +17,24 @@
 </head>
 <body>
     <h2>Path Animation (🤖 -> 🏁)</h2>
-    <div id="grid"></div>
+    <div id="grid-wrapper">
+        <div id="grid"></div>
+    </div>
     <div id="controls">
         <button onclick="startAnimation()">Play</button>
         <button onclick="resetAnimation()">Reset</button>
     </div>
     <script>
         const gridData = {"width":15,"height":15,"occupancy":[0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,1,1,1,1,1,0,1,1,1,1,1,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,1,1,1,1,1,1,1,1,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1,1,1,0,1,1,1,0,1,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]};
-        const pathData = [{"x":0,"y":0},{"x":1,"y":0},{"x":2,"y":0},{"x":2,"y":1},{"x":2,"y":2},{"x":3,"y":2},{"x":4,"y":2},{"x":4,"y":1},{"x":4,"y":0},{"x":5,"y":0},{"x":6,"y":0},{"x":6,"y":1},{"x":6,"y":2},{"x":7,"y":2},{"x":8,"y":2},{"x":8,"y":1},{"x":8,"y":0},{"x":9,"y":0},{"x":10,"y":0},{"x":10,"y":1},{"x":10,"y":2},{"x":11,"y":2},{"x":12,"y":2},{"x":12,"y":3},{"x":12,"y":4},{"x":11,"y":4},{"x":10,"y":4},{"x":9,"y":4},{"x":8,"y":4},{"x":8,"y":5},{"x":8,"y":6},{"x":7,"y":6},{"x":6,"y":6},{"x":5,"y":6},{"x":4,"y":6},{"x":3,"y":6},{"x":2,"y":6},{"x":1,"y":6},{"x":0,"y":6},{"x":0,"y":7},{"x":0,"y":8},{"x":0,"y":9},{"x":0,"y":10},{"x":0,"y":11},{"x":0,"y":12},{"x":1,"y":12},{"x":2,"y":12},{"x":3,"y":12},{"x":4,"y":12},{"x":5,"y":12},{"x":6,"y":12},{"x":7,"y":12},{"x":7,"y":13},{"x":7,"y":14},{"x":8,"y":14},{"x":9,"y":14},{"x":10,"y":14},{"x":11,"y":14},{"x":12,"y":14},{"x":13,"y":14},{"x":14,"y":14}];
+        const pathData = [{"x":0.0,"y":0.0,"id":"0,0"},{"x":1.0,"y":0.0,"id":"1,0"},{"x":2.0,"y":0.0,"id":"2,0"},{"x":2.0,"y":1.0,"id":"2,1"},{"x":2.0,"y":2.0,"id":"2,2"},{"x":3.0,"y":2.0,"id":"3,2"},{"x":4.0,"y":2.0,"id":"4,2"},{"x":4.0,"y":1.0,"id":"4,1"},{"x":4.0,"y":0.0,"id":"4,0"},{"x":5.0,"y":0.0,"id":"5,0"},{"x":6.0,"y":0.0,"id":"6,0"},{"x":6.0,"y":1.0,"id":"6,1"},{"x":6.0,"y":2.0,"id":"6,2"},{"x":7.0,"y":2.0,"id":"7,2"},{"x":8.0,"y":2.0,"id":"8,2"},{"x":8.0,"y":1.0,"id":"8,1"},{"x":8.0,"y":0.0,"id":"8,0"},{"x":9.0,"y":0.0,"id":"9,0"},{"x":10.0,"y":0.0,"id":"10,0"},{"x":10.0,"y":1.0,"id":"10,1"},{"x":10.0,"y":2.0,"id":"10,2"},{"x":11.0,"y":2.0,"id":"11,2"},{"x":12.0,"y":2.0,"id":"12,2"},{"x":12.0,"y":3.0,"id":"12,3"},{"x":12.0,"y":4.0,"id":"12,4"},{"x":11.0,"y":4.0,"id":"11,4"},{"x":10.0,"y":4.0,"id":"10,4"},{"x":9.0,"y":4.0,"id":"9,4"},{"x":8.0,"y":4.0,"id":"8,4"},{"x":8.0,"y":5.0,"id":"8,5"},{"x":8.0,"y":6.0,"id":"8,6"},{"x":7.0,"y":6.0,"id":"7,6"},{"x":6.0,"y":6.0,"id":"6,6"},{"x":5.0,"y":6.0,"id":"5,6"},{"x":4.0,"y":6.0,"id":"4,6"},{"x":3.0,"y":6.0,"id":"3,6"},{"x":2.0,"y":6.0,"id":"2,6"},{"x":1.0,"y":6.0,"id":"1,6"},{"x":0.0,"y":6.0,"id":"0,6"},{"x":0.0,"y":7.0,"id":"0,7"},{"x":0.0,"y":8.0,"id":"0,8"},{"x":0.0,"y":9.0,"id":"0,9"},{"x":0.0,"y":10.0,"id":"0,10"},{"x":0.0,"y":11.0,"id":"0,11"},{"x":0.0,"y":12.0,"id":"0,12"},{"x":1.0,"y":12.0,"id":"1,12"},{"x":2.0,"y":12.0,"id":"2,12"},{"x":3.0,"y":12.0,"id":"3,12"},{"x":4.0,"y":12.0,"id":"4,12"},{"x":5.0,"y":12.0,"id":"5,12"},{"x":6.0,"y":12.0,"id":"6,12"},{"x":7.0,"y":12.0,"id":"7,12"},{"x":7.0,"y":13.0,"id":"7,13"},{"x":7.0,"y":14.0,"id":"7,14"},{"x":8.0,"y":14.0,"id":"8,14"},{"x":9.0,"y":14.0,"id":"9,14"},{"x":10.0,"y":14.0,"id":"10,14"},{"x":11.0,"y":14.0,"id":"11,14"},{"x":12.0,"y":14.0,"id":"12,14"},{"x":13.0,"y":14.0,"id":"13,14"},{"x":14.0,"y":14.0,"id":"14,14"}];
         const gridEl = document.getElementById('grid');
         let animInterval = null;
 
         // Render Grid initial state
         function renderGrid() {
             gridEl.innerHTML = '';
-            gridEl.style.gridTemplateColumns = `repeat(${gridData.width}, 40px)`;
+            gridEl.style.gridTemplateColumns = `repeat(${gridData.width}, 1fr)`;
+            gridEl.style.gridTemplateRows = `repeat(${gridData.height}, 1fr)`;
             for (let y = 0; y < gridData.height; y++) {
                 for (let x = 0; x < gridData.width; x++) {
                     const cell = document.createElement('div');

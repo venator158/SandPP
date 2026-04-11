@@ -1,2 +1,6 @@
-com\example\pathsandbox\io\GridReader$GridData.class
+com\example\pathsandbox\io\OsmParser$OsmGraph.class
+com\example\pathsandbox\io\OsmGraphBuilder.class
 com\example\pathsandbox\io\GridReader.class
+com\example\pathsandbox\io\OsmParser$OsmNode.class
+com\example\pathsandbox\io\GridReader$GridData.class
+com\example\pathsandbox\io\OsmParser.class
